@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Project Grading</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="form-container">
+    <h2>Computer Science Project Evaluation</h2>
+
+    <form id="gradingForm">
+      <label>Group Members:</label>
+      <input type="text" id="groupMembers" required />
+
+      <label>Group Number:</label>
+      <input type="text" id="groupNumber" required />
+
+      <label>Project Title:</label>
+      <input type="text" id="projectTitle" required />
+
+      <h3>Criteria</h3>
+
+      <table>
+        <tr>
+          <th>Criteria</th>
+          <th>Developing (0–10)</th>
+          <th>Accomplished (10–15)</th>
+        </tr>
+        <tr>
+          <td>Articulate requirements</td>
+          <td><input type="number" id="c1a" min="0" max="10" /></td>
+          <td><input type="number" id="c1b" min="10" max="15" /></td>
+        </tr>
+        <tr>
+          <td>Choose appropriate tools/methods</td>
+          <td><input type="number" id="c2a" min="0" max="10" /></td>
+          <td><input type="number" id="c2b" min="10" max="15" /></td>
+        </tr>
+        <tr>
+          <td>Clear oral presentation</td>
+          <td><input type="number" id="c3a" min="0" max="10" /></td>
+          <td><input type="number" id="c3b" min="10" max="15" /></td>
+        </tr>
+        <tr>
+          <td>Functioned well as a team</td>
+          <td><input type="number" id="c4a" min="0" max="10" /></td>
+          <td><input type="number" id="c4b" min="10" max="15" /></td>
+        </tr>
+      </table>
+
+      <label>Total:</label>
+      <input type="text" id="totalScore" readonly />
+
+      <label>Judge Name:</label>
+      <input type="text" id="judgeName" readonly />
+
+      <label>Comments:</label>
+      <textarea id="comments"></textarea>
+
+      <button type="submit">Submit Grades</button>
+    </form>
+
+    <p id="success" class="success"></p>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", function () {
+      const judge = localStorage.getItem("loggedInJudge") || "Unknown";
+      document.getElementById("judgeName").value = judge;
+
+      const form = document.getElementById("gradingForm");
+      const totalField = document.getElementById("totalScore");
+      const successMsg = document.getElementById("success");
+
+      const criteria = [
+        ["c1a", "c1b"],
+        ["c2a", "c2b"],
+        ["c3a", "c3b"],
+        ["c4a", "c4b"]
+      ];
+
+      criteria.flat().forEach(id => {
+        const input = document.getElementById(id);
+        if (input) input.addEventListener("input", calculateTotal);
+      });
+
+      function calculateTotal() {
+        let total = 0;
+        criteria.forEach(([lowId, highId]) => {
+          const low = parseInt(document.getElementById(lowId).value) || 0;
+          const high = parseInt(document.getElementById(highId).value) || 0;
+          total += Math.max(low, high);
+        });
+        totalField.value = total;
+      }
+
+      form.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        const group = document.getElementById("groupNumber").value.trim();
+        const entry = {
+          judge,
+          groupMembers: document.getElementById("groupMembers").value.trim(),
+          projectTitle: document.getElementById("projectTitle").value.trim(),
+          total: parseInt(totalField.value),
+          comments: document.getElementById("comments").value.trim()
+        };
+
+        const key = `group_${group}_judge_${judge}`;
+        localStorage.setItem(key, JSON.stringify(entry));
+
+        successMsg.textContent = "Grades submitted successfully!";
+        form.reset();
+        totalField.value = "";
+        document.getElementById("judgeName").value = judge;
+      });
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Admin Panel</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="form-container">
+    <h2>Admin Panel - View Grades</h2>
+
+    <!-- Admin Login -->
+    <div id="loginSection">
+      <label>Username:</label>
+      <input type="text" id="adminUsername" />
+
+      <label>Password:</label>
+      <input type="password" id="adminPassword" />
+
+      <button onclick="checkAdmin()">Login</button>
+      <p id="adminError" class="error"></p>
+    </div>
+
+    <!-- Admin View -->
+    <div id="adminPanel" style="display: none;">
+      <button onclick="logoutAdmin()" style="float: right;">Logout</button>
+
+      <table id="gradesTable">
+        <thead>
+          <tr>
+            <th>Group</th>
+            <th>Group Members</th>
+            <th>Judge</th>
+            <th>Project Title</th>
+            <th>Total</th>
+            <th>Comments</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+
+      <h3>Group Averages</h3>
+      <ul id="averageList"></ul>
+    </div>
+  </div>
+
+  <script>
+    function checkAdmin() {
+      const username = document.getElementById("adminUsername").value.trim();
+      const password = document.getElementById("adminPassword").value.trim();
+      const error = document.getElementById("adminError");
+
+      const validAdmin = { admin: "admin123" };
+
+      if (validAdmin[username] === password) {
+        document.getElementById("loginSection").style.display = "none";
+        document.getElementById("adminPanel").style.display = "block";
+        loadGrades();
+      } else {
+        error.textContent = "Invalid admin username or password.";
+      }
+    }
+
+    function loadGrades() {
+      const tbody = document.querySelector("#gradesTable tbody");
+      const averages = {};
+      const counts = {};
+      const members = {};
+
+      for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        if (key.startsWith("group_")) {
+          const data = JSON.parse(localStorage.getItem(key));
+          const parts = key.split("_");
+          const group = parts[1];
+          const judge = data.judge;
+
+          if (!averages[group]) {
+            averages[group] = 0;
+            counts[group] = 0;
+            members[group] = data.groupMembers;
+          }
+
+          averages[group] += data.total;
+          counts[group]++;
+
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${group}</td>
+            <td>${data.groupMembers}</td>
+            <td>${judge}</td>
+            <td>${data.projectTitle}</td>
+            <td>${data.total}</td>
+            <td>${data.comments}</td>
+          `;
+          tbody.appendChild(row);
+        }
+      }
+
+      const avgList = document.getElementById("averageList");
+      avgList.innerHTML = "";
+      for (const group in averages) {
+        const avg = (averages[group] / counts[group]).toFixed(2);
+        const li = document.createElement("li");
+        li.textContent = `Group ${group} (${members[group]}): Average = ${avg}`;
+        avgList.appendChild(li);
+      }
+    }
+
+    function logoutAdmin() {
+      document.getElementById("adminPanel").style.display = "none";
+      document.getElementById("loginSection").style.display = "block";
+      document.getElementById("adminUsername").value = "";
+      document.getElementById("adminPassword").value = "";
+      document.getElementById("adminError").textContent = "";
+      document.querySelector("#gradesTable tbody").innerHTML = "";
+      document.getElementById("averageList").innerHTML = "";
+    }
+  </script>
+</body>
+</html>

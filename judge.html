@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Judge Login</title>
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <div class="login-container">
+    <h2>Judge Login</h2>
+    <form id="judgeLoginForm">
+      <label for="username">Username:</label>
+      <input type="text" id="username" required />
+
+      <label for="password">Password:</label>
+      <input type="password" id="password" required />
+
+      <button type="submit">Login</button>
+    </form>
+    <p id="error" class="error"></p>
+  </div>
+
+  <script>
+    document.getElementById("judgeLoginForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const username = document.getElementById("username").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const error = document.getElementById("error");
+
+      const validJudges = {
+        judge1: "pass1",
+        judge2: "pass2",
+        judge3: "pass3",
+        judge4: "pass4"
+      };
+
+      if (validJudges[username] === password) {
+        localStorage.setItem("loggedInJudge", username);
+        window.location.href = "grade.html";
+      } else {
+        error.textContent = "Invalid judge username or password.";
+      }
+    });
+  </script>
+</body>
+</html>
